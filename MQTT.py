@@ -25,6 +25,7 @@ class MQTTClient(mqtt.Client):
         self.enable_logger(self.logger)
 
         self.loop_thread = None
+        self.subscribed_topics = []
 
     def connect(self, host, port=1883, keepalive=60, bind_address="", bind_port=0,
                 clean_start=mqtt.MQTT_CLEAN_START_FIRST_ONLY, properties=None):
@@ -48,6 +49,7 @@ class MQTTClient(mqtt.Client):
 
     def subscribe(self, topic, qos=0, options=None, properties=None):
         super().subscribe(topic, qos, options, properties)
+        self.subscribed_topics.append(topic)
         self.logger.info('Subscribed to topic: {0}'.format(topic))
 
     def unsubscribe(self, topic, properties=None):

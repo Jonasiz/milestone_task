@@ -58,7 +58,8 @@ def add_client(client_ids, default_host, default_port):
         {
             'type': 'input',
             'name': 'client_id',
-            'message': 'Client ID'
+            'message': 'Client ID',
+            'validate': lambda val: len(val) > 0 or 'ID is required'
         },
         {
             'type': 'input',
@@ -81,11 +82,10 @@ def add_client(client_ids, default_host, default_port):
             'validate': PositiveNumberValidator
         },
         {
-            'type': 'input',
+            'type': 'confirm',
             'name': 'clean_session',
-            'message': 'Clean session? (y/n)',
-            'default': 'y',
-            'validate': lambda val: val in ['y', 'n'] or 'type "y" or "n"'
+            'message': 'Clean session?',
+            'default': True
         },
     ]
 
@@ -121,30 +121,56 @@ def publish(client_ids):
         },
         {
             'type': 'input',
-            'name': 'qos',
-            'message': 'Quality of service (QoS):',
-            'default': '1',
-            'validator': PositiveNumberValidator
-        },
-        {
-            'type': 'input',
             'name': 'topic',
             'message': 'Write your topic:',
             'default': 'interview/ioma/sensors/temperature/living_room/ABC1'
         },
         {
             'type': 'input',
+            'name': 'qos',
+            'message': 'Quality of service (QoS):',
+            'default': '1',
+            'validate': PositiveNumberValidator
+        },
+        {
+            'type': 'input',
             'name': 'data',
             'message': 'Data to publish:',
-            'default': '{"temp": 32}'
-        }
+            'default': '{\"temp\": 32}'
+        },
     ]
 
     return prompt(questions)
 
 
-def subscribe_client():
-    pass
+def subscribe_client(client_ids):
+    if not client_ids:
+        print('Please create a client first!')
+        return None
+
+    questions = [
+        {
+            'type': 'list',
+            'name': 'sub_id',
+            'message': 'Choose client for subscribing:',
+            'choices': [str(client_id) for client_id in client_ids]
+        },
+        {
+            'type': 'input',
+            'name': 'topic',
+            'message': 'Enter topic to subscribe to:',
+            'default': 'interview/ioma/sensors/temperature/living_room/ABC1'
+        },
+        {
+            'type': 'input',
+            'name': 'qos',
+            'message': 'Quality of service (QoS):',
+            'default': '1',
+            'validate': PositiveNumberValidator
+        },
+    ]
+
+    return prompt(questions)
 
 
 def unsubscribe_client():

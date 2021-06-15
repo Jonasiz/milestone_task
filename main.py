@@ -84,7 +84,7 @@ def main_interactive():
                 inputs = console_prompts.publish(client_ids)
 
                 if inputs is not None:
-                    client_manager.client_publish(int(inputs['pub_id']),
+                    client_manager.client_publish(inputs['pub_id'],
                                                   inputs['topic'],
                                                   inputs['data'],
                                                   int(inputs['qos']))
@@ -94,8 +94,16 @@ def main_interactive():
                         inputs['pub_id'], inputs['qos']
                     ))
             elif choice == console_prompts.main_actions['sub']:
-                console_prompts.subscribe_client(client_ids)
+                inputs = console_prompts.subscribe_client(client_ids)
 
+                if inputs is not None:
+                    client_manager.client_subscribe(inputs['sub_id'],
+                                                    inputs['topic'],
+                                                    int(inputs['qos']))
+
+                    print('Subscribed client "{0}" to topic "{1}" (QoS: {2})'.format(
+                        inputs['sub_id'], inputs['topic'], inputs['qos']
+                    ))
             elif choice == console_prompts.main_actions['unsub']:
                 console_prompts.unsubscribe_client()
 

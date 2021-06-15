@@ -17,20 +17,21 @@ class ClientManager:
             client.disconnect()
 
     def remove_client(self, client_id):
-        filtered = [client for client in self.clients if client.client_id == client_id]
-
-        if filtered:
-            found_client = filtered[0]
-            found_client.disconnect()
-            self.clients.remove(found_client)
-        else:
-            raise ValueError('Client ID not found when removing')
+        found_client = self._find_client(client_id)
+        self.clients.remove(found_client)
 
     def client_publish(self, client_id, topic, data, qos):
+        found_client = self._find_client(client_id)
+        found_client.publish(topic, payload=data, qos=qos)
+
+    def client_subscribe(self, client_id, topic, qos):
+        found_client = self._find_client(client_id)
+        found_client.subscribe(topic, qos=qos)
+
+    def _find_client(self, client_id):
         filtered = [client for client in self.clients if client.client_id == client_id]
 
-        if filtered:
-            found_client = filtered[0]
-            found_client.publish(topic, payload=data, qos=qos)
-        else:
-            raise ValueError('Client ID not found when publishing')
+        if not filtered:
+            raise ValueError('Client ID not found in client list')
+
+        return filtered[0]
