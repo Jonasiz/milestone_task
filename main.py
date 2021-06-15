@@ -17,33 +17,33 @@ def main():
 
     # Freezer client/sensor
     freezer_client = MQTTClient('client_a_unique_id', clean_session=True)
-    freezer_client.connect_client(broker_domain, port=broker_port, keepalive=120)
-    freezer_client.subscribe_topic(living_room_sensor, qos=1)
+    freezer_client.connect(broker_domain, port=broker_port, keepalive=120)
+    freezer_client.subscribe(living_room_sensor, qos=1)
 
     # Living room client/sensor
     living_room_client = MQTTClient('client_b_unique_id', clean_session=True)
-    living_room_client.connect_client(broker_domain, port=broker_port, keepalive=60)
-    living_room_client.subscribe_topic(freezer_sensor, qos=1)
+    living_room_client.connect(broker_domain, port=broker_port, keepalive=60)
+    living_room_client.subscribe(freezer_sensor, qos=1)
 
     print('Both clients started! Check log files')
 
     try:
         while True:
-            freezer_client.publish_message(
+            freezer_client.publish(
                 freezer_sensor,
                 json.dumps({'freezer_temp': random.randint(-40, -20)})
             )
             time.sleep(1)
 
-            living_room_client.publish_message(
+            living_room_client.publish(
                 living_room_sensor,
                 json.dumps({'living_room_temp': random.randint(5, 30)})
             )
             time.sleep(1)
 
     except KeyboardInterrupt:
-        freezer_client.disconnect_client()
-        living_room_client.disconnect_client()
+        freezer_client.disconnect()
+        living_room_client.disconnect()
         print('Interrupted, exiting...')
 
 
