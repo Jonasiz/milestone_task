@@ -105,11 +105,23 @@ def main_interactive():
                         inputs['sub_id'], inputs['topic'], inputs['qos']
                     ))
             elif choice == console_prompts.main_actions['unsub']:
-                console_prompts.unsubscribe_client()
+                unsub_id = console_prompts.unsubscribe_client_id(client_ids)
+
+                client = [client for client in client_manager.clients
+                          if client.client_id == unsub_id][0]
+
+                unsub_topic = console_prompts.unsubscribe_client_topic(client)
+
+                if unsub_topic is not None:
+                    client_manager.client_unsubscribe(client.client_id, unsub_topic)
+
+                    print('Unsubscribed client "{0}" from topic "{1}"'.format(
+                        unsub_id, unsub_topic
+                    ))
 
     except EOFError:
-        client_manager.disconnect_all()
         print('Interrupted, exiting...')
+        client_manager.disconnect_all()
 
 
 if __name__ == '__main__':

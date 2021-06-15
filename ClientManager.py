@@ -28,6 +28,10 @@ class ClientManager:
         found_client = self._find_client(client_id)
         found_client.subscribe(topic, qos=qos)
 
+    def client_unsubscribe(self, client_id, topic):
+        found_client = self._find_client(client_id)
+        found_client.unsubscribe(topic)
+
     def _find_client(self, client_id):
         filtered = [client for client in self.clients if client.client_id == client_id]
 

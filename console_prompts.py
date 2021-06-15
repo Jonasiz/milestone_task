@@ -108,10 +108,6 @@ def remove_client(client_ids):
 
 
 def publish(client_ids):
-    if not client_ids:
-        print('Please create a client first!')
-        return None
-
     questions = [
         {
             'type': 'list',
@@ -145,7 +141,6 @@ def publish(client_ids):
 
 def subscribe_client(client_ids):
     if not client_ids:
-        print('Please create a client first!')
         return None
 
     questions = [
@@ -173,10 +168,31 @@ def subscribe_client(client_ids):
     return prompt(questions)
 
 
-def unsubscribe_client():
-    pass
+def unsubscribe_client_id(client_ids):
+    if not client_ids:
+        print('Please create a client first!')
+        return None
+
+    question = {
+        'type': 'list',
+        'name': 'unsub_id',
+        'message': 'Choose client for unsubscribing:',
+        'choices': [str(client_id) for client_id in client_ids]
+    }
+
+    return prompt([question]).get('unsub_id')
 
 
-def load_preset():
-    pass
+def unsubscribe_client_topic(client):
+    if not client.sub_topics:
+        print('Client is not subscribed to any topics!')
+        return None
 
+    question = {
+        'type': 'list',
+        'name': 'topic',
+        'message': 'Choose topic to unsubscribe from:',
+        'choices': client.sub_topics
+    }
+
+    return prompt([question]).get('topic')
