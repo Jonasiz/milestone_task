@@ -5,6 +5,7 @@ import time
 
 from dotenv import load_dotenv
 
+from ClientManager import ClientManager
 from MQTT import MQTTClient
 import console_prompts
 
@@ -50,10 +51,40 @@ def main():
 
 
 def main_interactive():
+    load_dotenv()
+    broker_domain = str(os.getenv('BROKER_HOST'))
+    broker_port = int(os.getenv('BROKER_PORT'))
+    client_manager = ClientManager()
+
     try:
         while True:
+            client_ids = [client.client_id for client in client_manager.clients]
             choice = console_prompts.main_menu()
+
+            if choice == console_prompts.main_actions['show']:
+                console_prompts.show_clients(client_ids)
+            elif choice == console_prompts.main_actions['add']:
+                inputs = console_prompts.add_client(client_ids, broker_domain, broker_port)
+
+                client_manager.add_client(inputs['client_id'],
+                                          inputs['host'],
+                                          int(inputs['port']),
+                                          int(inputs['keepalive']),
+                                          inputs['clean_session'] == 'y')
+
+                print('Client added and connected!')
+
+            elif choice == console_prompts.main_actions['remove']:
+                console_prompts.remove_client()
+            elif choice == console_prompts.main_actions['pub']:
+                console_prompts.publish()
+            elif choice == console_prompts.main_actions['sub']:
+                console_prompts.subscribe_client()
+            elif choice == console_prompts.main_actions['unsub']:
+                console_prompts.unsubscribe_client()
+
     except EOFError:
+        client_manager.disconnect_all()
         print('Interrupted, exiting...')
 
 

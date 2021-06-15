@@ -18,6 +18,8 @@ class MQTTClient(mqtt.Client):
     def __init__(self, client_id, clean_session):
         super().__init__(client_id, clean_session)
 
+        self.client_id = client_id
+
         log_file = './logs/{0}'.format(client_id + '.log')
         self.logger = logger.get_logger(client_id, log_file)
         self.enable_logger(self.logger)
