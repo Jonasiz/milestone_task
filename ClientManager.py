@@ -2,7 +2,7 @@ import MQTT
 
 
 class ClientManager:
-    """ Keeps track of clients and topics they are subscribed to """
+    """ Keeps track of MQTT clients and conducts operations on them """
 
     def __init__(self):
         self.clients = []
