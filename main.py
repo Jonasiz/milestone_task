@@ -4,7 +4,9 @@ import random
 import time
 
 from dotenv import load_dotenv
+
 from MQTT import MQTTClient
+import console_prompts
 
 
 def main():
@@ -47,5 +49,13 @@ def main():
         print('Interrupted, exiting...')
 
 
+def main_interactive():
+    try:
+        while True:
+            choice = console_prompts.main_menu()
+    except EOFError:
+        print('Interrupted, exiting...')
+
+
 if __name__ == '__main__':
-    main()
+    main_interactive()
