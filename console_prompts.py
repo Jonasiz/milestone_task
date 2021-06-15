@@ -1,11 +1,11 @@
-from PyInquirer import prompt, Separator
+from PyInquirer import prompt
 from prompt_toolkit.validation import Validator, ValidationError
-from regex import regex
+
 
 main_actions = {
     'show': 'Show MQTT clients',
-    'add': 'Add MQTT client',
-    'remove': 'Remove (disconnect) MQTT client',
+    'add': 'Add an MQTT client',
+    'remove': 'Remove/Disconnect an MQTT client',
     'pub': 'Publish to a topic',
     'sub': 'Subscribe client to a topic',
     'unsub': 'Unsubscribe client from a topic'
@@ -92,8 +92,55 @@ def add_client(client_ids, default_host, default_port):
     return prompt(questions)
 
 
-def remove_client():
-    pass
+def remove_client(client_ids):
+    if not client_ids:
+        print('No clients to remove!')
+        return None
+
+    questions = [{
+        'type': 'list',
+        'name': 'remove_id',
+        'message': 'Choose client to remove:',
+        'choices': [str(client_id) for client_id in client_ids]
+    }]
+
+    return prompt(questions).get('remove_id')
+
+
+def publish(client_ids):
+    if not client_ids:
+        print('Please create a client first!')
+        return None
+
+    questions = [
+        {
+            'type': 'list',
+            'name': 'pub_id',
+            'message': 'Choose client for publishing:',
+            'choices': [str(client_id) for client_id in client_ids]
+        },
+        {
+            'type': 'input',
+            'name': 'qos',
+            'message': 'Quality of service (QoS):',
+            'default': '1',
+            'validator': PositiveNumberValidator
+        },
+        {
+            'type': 'input',
+            'name': 'topic',
+            'message': 'Write your topic:',
+            'default': 'interview/ioma/sensors/temperature/living_room/ABC1'
+        },
+        {
+            'type': 'input',
+            'name': 'data',
+            'message': 'Data to publish:',
+            'default': '{"temp": 32}'
+        }
+    ]
+
+    return prompt(questions)
 
 
 def subscribe_client():
@@ -101,10 +148,6 @@ def subscribe_client():
 
 
 def unsubscribe_client():
-    pass
-
-
-def publish():
     pass
 
 

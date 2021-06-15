@@ -16,3 +16,21 @@ class ClientManager:
         for client in self.clients:
             client.disconnect()
 
+    def remove_client(self, client_id):
+        filtered = [client for client in self.clients if client.client_id == client_id]
+
+        if filtered:
+            found_client = filtered[0]
+            found_client.disconnect()
+            self.clients.remove(found_client)
+        else:
+            raise ValueError('Client ID not found when removing')
+
+    def client_publish(self, client_id, topic, data, qos):
+        filtered = [client for client in self.clients if client.client_id == client_id]
+
+        if filtered:
+            found_client = filtered[0]
+            found_client.publish(topic, payload=data, qos=qos)
+        else:
+            raise ValueError('Client ID not found when publishing')

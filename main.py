@@ -72,14 +72,30 @@ def main_interactive():
                                           int(inputs['keepalive']),
                                           inputs['clean_session'] == 'y')
 
-                print('Client added and connected!')
-
+                print('Client added and connected.')
             elif choice == console_prompts.main_actions['remove']:
-                console_prompts.remove_client()
+                removed_id = console_prompts.remove_client(client_ids)
+
+                if removed_id is not None:
+                    client_manager.remove_client(removed_id)
+                    print('Client removed and disconnected.')
+
             elif choice == console_prompts.main_actions['pub']:
-                console_prompts.publish()
+                inputs = console_prompts.publish(client_ids)
+
+                if inputs is not None:
+                    client_manager.client_publish(int(inputs['pub_id']),
+                                                  inputs['topic'],
+                                                  inputs['data'],
+                                                  int(inputs['qos']))
+
+                    print('Published "{0}" to topic {1} for client "{2}" (qos={3})'.format(
+                        inputs['data'], inputs['topic'],
+                        inputs['pub_id'], inputs['qos']
+                    ))
             elif choice == console_prompts.main_actions['sub']:
-                console_prompts.subscribe_client()
+                console_prompts.subscribe_client(client_ids)
+
             elif choice == console_prompts.main_actions['unsub']:
                 console_prompts.unsubscribe_client()
 
