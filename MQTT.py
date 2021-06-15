@@ -5,20 +5,13 @@ import paho.mqtt.client as mqtt
 import logger
 
 
-def _on_message_callback(client, userdata, message):
-    print_msg = 'Received {0} on topic: {1} with QoS {2}'.format(
-        message.payload, message.topic, message.qos
-    )
-
-    client.logger.info(print_msg)
-
-
 class MQTTClient(mqtt.Client):
 
-    def __init__(self, client_id, clean_session):
+    def __init__(self, client_id, clean_session, msg_handler):
         super().__init__(client_id, clean_session)
 
         self.client_id = client_id
+        self.on_message = msg_handler
 
         log_file = './logs/{0}'.format(client_id + '.log')
         self.logger = logger.get_logger(client_id, log_file)
@@ -26,12 +19,12 @@ class MQTTClient(mqtt.Client):
 
         self.loop_thread = None
         self.sub_topics = []
+        self.temperature = 15
 
     def connect(self, host, port=1883, keepalive=60, bind_address="", bind_port=0,
                 clean_start=mqtt.MQTT_CLEAN_START_FIRST_ONLY, properties=None):
 
         super().connect(host, port, keepalive, bind_address, bind_port, clean_start, properties)
-        self.on_message = _on_message_callback
 
         self.loop_thread = threading.Thread(target=self._loop)
         self.loop_thread.start()
@@ -62,3 +55,4 @@ class MQTTClient(mqtt.Client):
     def _loop(self):
         self.logger.info('Looping...')
         self.loop_forever()
+        self.logger.info('Looping finished')

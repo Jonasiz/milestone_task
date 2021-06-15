@@ -10,6 +10,34 @@ from MQTT import MQTTClient
 import console_prompts
 
 
+def freezer_callback(client, userdata, message):
+    print_msg = 'Received {0} on topic: {1} with QoS {2}'.format(
+        message.payload, message.topic, message.qos
+    )
+
+    client.logger.info(print_msg)
+
+    living_room_temp = json.loads(message.payload)['temp']
+    client.temperature = living_room_temp - 30
+    client.logger.info('Updated freezer temperature to {0} C (living room temp: {1})'.format(
+        client.temperature, living_room_temp
+    ))
+
+
+def living_room_callback(client, userdata, message):
+    print_msg = 'Received {0} on topic: {1} with QoS {2}'.format(
+        message.payload, message.topic, message.qos
+    )
+
+    client.logger.info(print_msg)
+
+    freezer_temp = json.loads(message.payload)['temp']
+    client.temperature = freezer_temp + 30
+    client.logger.info('Updated living room temperature to {0} C (freezer temp: {1})'.format(
+        client.temperature, freezer_temp
+    ))
+
+
 def main():
     load_dotenv()
     broker_domain = str(os.getenv('BROKER_HOST'))
@@ -19,12 +47,14 @@ def main():
     freezer_sensor = 'interview/ioma/sensors/temperature/freezer/CBA1'
 
     # Freezer client/sensor
-    freezer_client = MQTTClient('client_a_unique_id', clean_session=True)
+    freezer_client = MQTTClient('freezer_id', clean_session=True,
+                                msg_handler=freezer_callback)
     freezer_client.connect(broker_domain, port=broker_port, keepalive=120)
     freezer_client.subscribe(living_room_sensor, qos=1)
 
     # Living room client/sensor
-    living_room_client = MQTTClient('client_b_unique_id', clean_session=True)
+    living_room_client = MQTTClient('living_room_id', clean_session=True,
+                                    msg_handler=living_room_callback)
     living_room_client.connect(broker_domain, port=broker_port, keepalive=60)
     living_room_client.subscribe(freezer_sensor, qos=1)
 
@@ -32,18 +62,18 @@ def main():
 
     try:
         while True:
-            freezer_client.publish(
-                freezer_sensor,
-                json.dumps({'freezer_temp': random.randint(-40, -20)}),
-                qos=1
-            )
+            # Fluctuate freezer temperature
+            freezer_temp = freezer_client.temperature + random.randint(-5, 5)
+            freezer_client.publish(freezer_sensor,
+                                   json.dumps({'temp': freezer_temp}),
+                                   qos=1)
             time.sleep(random.randint(1, 2))
 
-            living_room_client.publish(
-                living_room_sensor,
-                json.dumps({'living_room_temp': random.randint(5, 30)}),
-                qos=1
-            )
+            # Fluctuate living room temperature
+            living_room_temp = living_room_client.temperature + random.randint(-5, 5)
+            living_room_client.publish(living_room_sensor,
+                                       json.dumps({'temp': living_room_temp}),
+                                       qos=1)
             time.sleep(random.randint(1, 2))
 
     except KeyboardInterrupt:
@@ -120,7 +150,7 @@ def main_interactive():
                     print('Unsubscribed client "{0}" from topic "{1}"'.format(
                         unsub_id, unsub_topic
                     ))
-
-    except EOFError:
+    except (EOFError, KeyError):
         print('Interrupted, exiting...')
         client_manager.disconnect_all()
+        print('Done.')

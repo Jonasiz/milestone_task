@@ -41,7 +41,7 @@ def main_menu():
         ]
     }]
 
-    return prompt(questions).get('action')
+    return prompt(questions)['action']
 
 
 def show_clients(client_ids):
@@ -104,7 +104,7 @@ def remove_client(client_ids):
         'choices': [str(client_id) for client_id in client_ids]
     }]
 
-    return prompt(questions).get('remove_id')
+    return prompt(questions)['remove_id']
 
 
 def publish(client_ids):
@@ -195,4 +195,4 @@ def unsubscribe_client_topic(client):
         'choices': client.sub_topics
     }
 
-    return prompt([question]).get('topic')
+    return prompt([question])['topic']

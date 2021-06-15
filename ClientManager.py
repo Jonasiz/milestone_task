@@ -1,6 +1,14 @@
 import MQTT
 
 
+def msg_handler(client, userdata, message):
+    print_msg = 'Received {0} on topic: {1} with QoS {2}'.format(
+        message.payload, message.topic, message.qos
+    )
+
+    client.logger.info(print_msg)
+
+
 class ClientManager:
     """ Keeps track of MQTT clients and conducts operations on them """
 
@@ -8,7 +16,8 @@ class ClientManager:
         self.clients = []
 
     def add_client(self, client_id, host, port, keepalive, clean_session):
-        client = MQTT.MQTTClient(client_id, clean_session=clean_session)
+        client = MQTT.MQTTClient(client_id, clean_session=clean_session,
+                                 msg_handler=msg_handler)
         client.connect(host, port=port, keepalive=keepalive)
         self.clients.append(client)
 
